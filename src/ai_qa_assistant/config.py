@@ -3,10 +3,13 @@ Configuration management for the AI QA Assistant.
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from project root
+project_root = Path(__file__).parent.parent.parent
+env_path = project_root / ".env"
+load_dotenv(dotenv_path=env_path)
 
 
 def load_config() -> dict:

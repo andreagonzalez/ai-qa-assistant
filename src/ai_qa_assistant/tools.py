@@ -6,12 +6,12 @@ import os
 from pathlib import Path
 
 
-def load_checklist(checklist_path: str = "src/docs/checklist_qa.md") -> str:
+def load_checklist(checklist_path: str = "docs/checklist_qa.md") -> str:
     """
     Load QA checklist from a Markdown file.
     
     Args:
-        checklist_path: Path to the checklist file (default: src/docs/checklist_qa.md)
+        checklist_path: Path to the checklist file (default: docs/checklist_qa.md)
         
     Returns:
         Checklist content as string
