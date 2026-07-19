@@ -147,7 +147,7 @@ O relatório completo também pode ser visualizado em um arquivo Markdown gerado
 
 ## Estrutura do Projeto
 
-```
+```text
 ai-qa-assistant/
 ├── src/
 │   ├── ai_qa_assistant/
