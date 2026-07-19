@@ -109,6 +109,45 @@ result = run_analysis(user_story)
 print(result.report)
 ```
 
+### Exemplo de saída
+
+O relatório final é gerado em Markdown com seções claras de análise, critérios de aceite, casos de teste, riscos e recomendações. Um exemplo de saída parcial:
+
+```markdown
+# Relatório de Análise de User Story
+
+## 1. Resumo
+
+**Funcionalidade**: Recuperação de senha para clientes que esqueceram suas senhas.
+**Usuário**: Cliente do sistema que possui uma conta registrada.
+
+## 2. Funcionalidades Identificadas
+
+- Solicitação de recuperação de senha via e-mail ou SMS.
+- Envio de link ou código de verificação para redefinição de senha.
+- Redefinição de senha com critérios de segurança.
+
+## 3. Critérios de Aceite
+
+### AC01 - Solicitação de Recuperação de Senha
+- O cliente deve poder solicitar a recuperação de senha através de um formulário na interface de login.
+- O formulário deve solicitar o e-mail ou número de telefone associado à conta.
+
+## 4. Casos de Teste
+
+### Cenários Positivos
+#### CT001 - Solicitação de Recuperação de Senha com E-mail Válido
+**Precondição**: O cliente está na página de login.
+```
+
+O relatório completo também pode ser visualizado em um arquivo Markdown gerado, como `reports/report_01.md`.
+**Passos**:
+1. Clique no link "Esqueceu a senha?".
+2. Insira um e-mail válido associado à conta.
+3. Clique no botão "Enviar".
+**Resultado Esperado**: O cliente recebe um e-mail com o link ou código de verificação.
+```
+
 ## Estrutura do Projeto
 
 ```

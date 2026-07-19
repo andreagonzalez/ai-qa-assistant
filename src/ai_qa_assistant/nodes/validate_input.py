@@ -9,10 +9,9 @@ The node updates the state with the validation result and any error
 messages if validation fails.
 """
 
-from typing import Tuple
-
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import VALIDATE_INPUT_PROMPT, VALIDATE_INPUT_SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def validate_input(state: QAState) -> QAState:
@@ -32,17 +31,29 @@ def validate_input(state: QAState) -> QAState:
     Returns:
         Updated state with validation result in user_story field.
         If invalid, the user_story field will be prefixed with "INVALID: "
-        
-    Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.VALIDATE_INPUT_PROMPT
-        - Should return state with valid/invalid status
     """
-    # TODO: Call LLM with VALIDATE_INPUT_PROMPT and VALIDATE_INPUT_SYSTEM_PROMPT
-    # TODO: Parse LLM response to determine validation result
-    # TODO: Update state based on validation result
-    # TODO: Return updated state
-    
-    # Placeholder: return state as-is
-    # In production, this would call the LLM and validate the response
-    pass
+    prompt_data = {
+        "user_story": state["user_story"],
+    }
+
+    response = call_llm_with_template(
+        VALIDATE_INPUT_PROMPT,
+        **prompt_data,
+        system_prompt=VALIDATE_INPUT_SYSTEM_PROMPT,
+    ).strip()
+
+    normalized = response.strip()
+    if normalized.upper().startswith("VALID"):
+        return state
+
+    if normalized.upper().startswith("INVALID"):
+        reason = normalized[7:].strip()
+        if reason.startswith(":"):
+            reason = reason[1:].strip()
+        invalid_message = reason or "User Story inválida"
+        state["user_story"] = f"INVALID: {invalid_message}"
+        raise ValueError(f"Invalid user story: {invalid_message}")
+
+    raise ValueError(
+        f"Unexpected validation response from LLM: '{response}'. Expected 'VALID' or 'INVALID: <motivo>'."
+    )
