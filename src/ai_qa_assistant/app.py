@@ -16,7 +16,7 @@ Usage:
     # As a module
     from ai_qa_assistant.app import run_analysis
     result = run_analysis("Como ...")
-    print(result.report)
+    print(result["report"])
 """
 
 import os
@@ -49,6 +49,7 @@ def run_analysis(user_story: str) -> QAState:
         
     Returns:
         Final state with complete analysis and report populated
+        Returns a dict (QAState TypedDict) with all fields populated
         
     Raises:
         ValueError: If OPENAI_API_KEY is not set in environment
@@ -63,11 +64,20 @@ def run_analysis(user_story: str) -> QAState:
     # Initialize graph
     graph = create_graph()
     
-    # Initialize state
-    state = QAState(user_story=user_story)
+    # Initialize state as dict (QAState is TypedDict)
+    state: QAState = {
+        "user_story": user_story,
+        "checklist": "",
+        "analysis": "",
+        "acceptance_criteria": "",
+        "test_cases": "",
+        "risks": "",
+        "recommendations": "",
+        "report": "",
+    }
     
     # Run analysis
-    result = graph.invoke(state)
+    result: QAState = graph.invoke(state)
     
     return result
 
@@ -110,7 +120,7 @@ def main():
         print("\n" + "=" * 60)
         print("ANÁLISE CONCLUÍDA")
         print("=" * 60)
-        print("\n" + result.report)
+        print("\n" + result["report"])
     except Exception as e:
         print(f"Error during analysis: {e}")
         sys.exit(1)

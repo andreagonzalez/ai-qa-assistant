@@ -9,10 +9,10 @@ during the analysis of the user story.
 from pathlib import Path
 
 from ai_qa_assistant.state import QAState
-from ai_qa_assistant.tools import load_checklist
+from ai_qa_assistant.tools import load_checklist as load_checklist_tool
 
 
-def load_checklist_node(state: QAState) -> QAState:
+def load_checklist(state: QAState) -> QAState:
     """
     Load QA checklist from file.
     
@@ -23,16 +23,16 @@ def load_checklist_node(state: QAState) -> QAState:
         state: Current state
         
     Returns:
-        Updated state with checklist loaded
+        Updated state with checklist loaded in state.checklist
         
     Notes:
-        - This is a placeholder implementation
-        - Uses tools.load_checklist() to read the file
-        - Should update state.checklist field
+        - Loads checklist from src/docs/checklist_qa.md
+        - Updates state.checklist with the file content
     """
-    # TODO: Call tools.load_checklist() to read the checklist file
-    # TODO: Update state.checklist with the loaded content
-    # TODO: Return updated state
+    # Load checklist from tools
+    checklist_content = load_checklist_tool()
     
-    # Placeholder: return state as-is
-    pass
+    # Update state with checklist
+    state["checklist"] = checklist_content
+    
+    return state
