@@ -1,0 +1,9 @@
+Como cliente, quero recuperar minha senha para conseguir acessar novamente minha conta.
+
+---
+
+Como usuário, quero visualizar meu histórico de compras para acompanhar meus pedidos.
+
+---
+
+Como administrador, quero bloquear usuários para gerenciar acessos indevidos.

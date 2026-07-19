@@ -81,8 +81,12 @@ cp .env.example .env
 # Passando a User Story diretamente
 ai-qa-assistant "Como cliente, quero recuperar minha senha para conseguir acessar novamente minha conta."
 
-# Passando arquivo de texto
+# Passando arquivo de texto com uma única User Story
 ai-qa-assistant --file user-story.txt
+
+# Passando arquivo de texto com várias User Stories
+# Separe cada história por uma linha em branco ou use '---' como delimitador
+ai-qa-assistant --file examples/multiple-user-stories.txt
 ```
 
 ### Como biblioteca
