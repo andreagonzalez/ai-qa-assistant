@@ -89,6 +89,15 @@ ai-qa-assistant --file user-story.txt
 ai-qa-assistant --file examples/multiple-user-stories.txt
 ```
 
+### Gerar relatórios em arquivos Markdown
+
+```bash
+source .venv/bin/activate
+python scripts/run_and_save_reports.py
+```
+
+O script salva cada relatório em `reports/report_XX.md`.
+
 ### Como biblioteca
 
 ```python
