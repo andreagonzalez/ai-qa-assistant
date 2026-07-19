@@ -20,7 +20,7 @@ Reducir o esforço manual necessário para transformar requisitos em um plano in
 
 ## Problema
 
-Durante o refinamento de requisitos, analistas de testes precisam interpretar User Stories e elaborar manualmente critérios de aceite e casos de teste. Esse processo consome tempo, depende da experiência do analista, pode gerar inconsistências e nem sempre cobre riscos importantes.
+Durante o refinamento de requisitos, analistas de testes precisam interpretar User Stories e elaborar manualmente critérios de aceite e casos de teste. Esse processo consome tempo, depende da experiência do analista e é propenso a erros.
 
 ## Solução
 
@@ -199,4 +199,3 @@ O agente não substitui a revisão humana. As respostas são sugestões produzid
 - Integração com GitHub Issues
 - Exportação para PDF
 - Interface Web em Streamlit
->>>>>>> 08e25df (fix: correct README project structure formatting)
