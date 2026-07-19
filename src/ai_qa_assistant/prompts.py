@@ -1,80 +1,170 @@
 """
 Prompts template strings for the AI QA Assistant.
+
+This module defines all prompts used by the LangGraph nodes to interact
+with the LLM. Each prompt is designed for a specific step in the QA analysis
+pipeline and includes clear instructions and output format specifications.
+
+All prompts use Python f-string syntax for parameter substitution.
 """
 
-# Main system prompt for the QA analyst agent
-SYSTEM_PROMPT = """
-Você é um Analista de Testes experiente e atencioso.
-Sua tarefa é analisar User Stories e produzir documentação técnica de qualidade.
+# ============================================================================
+# SYSTEM PROMPTS
+# ============================================================================
 
-Regras:
-- Analise com atenção os requisitos
+SYSTEM_PROMPT = """
+Você é um Analista de Testes experiente e atencioso, especializado em análise
+de requisitos e planejamento de testes.
+
+Sua tarefa é analisar User Stories e produzir documentação técnica de alta
+qualidade seguindo boas práticas de QA.
+
+Regras de comportamento:
+- Analise com atenção todos os detalhes dos requisitos
 - Identifique todos os aspectos que precisam ser testados
 - Considere cenários positivos, negativos e exceções
 - Identifique riscos técnicos e de negócio
 - Seja específico e detalhado nos critérios de aceite
 - Utilize Markdown para formatação
+- Considere o checklist QA fornecido como referência
+- Seu público-alvo inclui QA Engineers, Desenvolvedores e Product Owners
 """
 
-# Prompt para analisar a User Story
-ANALYZE_STORY_PROMPT = """
-Analise a seguinte User Story e extraia:
+VALIDATE_INPUT_SYSTEM_PROMPT = """
+Você é um validador de requisitos. Sua tarefa é verificar se a entrada
+corresponde a uma User Story válida.
+"""
 
-1. Funcionalidade principal
-2. Ator (quem utiliza)
-3. Benefício (por que é importante)
-4. Pré-condições
-5. Pós-condições
+# ============================================================================
+# NODE-SPECIFIC PROMPTS
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# validate_input
+# ----------------------------------------------------------------------------
+
+VALIDATE_INPUT_PROMPT = """
+Valide se a entrada fornecida é uma User Story válida.
+
+Regras de validação:
+- A User Story deve estar em linguagem natural
+- Deve conter as três partes fundamentais: "Como", "Quero", "Para"
+- O formato típico é: "Como [ator], quero [funcionalidade], para [benefício]"
+- Tamanho máximo permitido: 5000 caracteres
+- Não deve conter código ou sintaxe técnica complexa
+
+User Story a ser validada:
+{user_story}
+
+Formato de resposta:
+- Responda apenas "VALID" se a User Story for válida
+- Responda "INVALID: <motivo>" se a User Story for inválida
+
+Exemplos de resposta:
+VALID
+INVALID: User Story não contém a parte "para" (benefício)
+"""
+
+# ----------------------------------------------------------------------------
+# load_checklist
+# ----------------------------------------------------------------------------
+
+LOAD_CHECKLIST_PROMPT = """
+Carregue o checklist de QA para referência durante a análise.
+
+Checklist:
+{checklist_content}
+
+Use este checklist como guia para identificar aspectos que devem ser
+considerados na análise da User Story.
+"""
+
+# ----------------------------------------------------------------------------
+# analyze_story
+# ----------------------------------------------------------------------------
+
+ANALYZE_STORY_PROMPT = """
+Analise a User Story fornecida e extraia as informações essenciais para
+o planejamento de testes.
 
 User Story:
 {user_story}
 
-Formato de resposta (Markdown):
+Checklist:
+{checklist}
+
+Extraia as seguintes informações:
+
 ## Análise da User Story
 
 ### Funcionalidade Principal
-...
+Descreva a funcionalidade principal que está sendo solicitada.
 
-### Ator
-...
+### Ator (Quem utiliza)
+Identifique o papel ou角色 que utiliza esta funcionalidade.
 
-### Benefício
-...
+### Benefício (Por que é importante)
+Explique o valor ou benefício que esta funcionalidade traz.
 
 ### Pré-condições
-...
+Descreva as condições que devem estar satisfeitas antes da funcionalidade
+ser executada.
 
 ### Pós-condições
-...
+Descreva o estado final após a execução da funcionalidade.
+
+### Regras de Negócio
+Identifique todas as regras de negócio implícitas ou explícitas.
+
+### Dados envolvidos
+Liste os dados ou entidades envolvidos na funcionalidade.
+
+Formato de resposta:
+Utilize Markdown para formatação. Seja específico e detalhado.
 """
 
-# Prompt para gerar critérios de aceite
-GENERATE_ACCEPTANCE_PROMPT = """
-Com base na análise da User Story e no checklist QA, gere critérios de aceite.
+# ----------------------------------------------------------------------------
+# generate_acceptance
+# ----------------------------------------------------------------------------
 
-User Story:
+GENERATE_ACCEPTANCE_PROMPT = """
+Gere critérios de aceite para a User Story com base na análise realizada.
+
+User Story Original:
 {user_story}
 
 Análise:
 {analysis}
 
-Checklist:
+Checklist QA:
 {checklist}
 
+Critérios de Aceite devem:
+- Ser específicos e testáveis
+- Cobrir cenários de sucesso (happy path)
+- Cobrir cenários de falha (error path)
+- Ser verificáveis sem ambiguidade
+- Incluir condições de saída (exit criteria)
+
 Formato de resposta (Markdown):
+
 ## Critérios de Aceite
 
-- **AC01**: ...
-- **AC02**: ...
-- **AC03**: ...
+- **AC01 - [Descrição breve]**: Descrição detalhada do critério
+- **AC02 - [Descrição breve]**: Descrição detalhada do critério
+- **AC03 - [Descrição breve]**: Descrição detalhada do critério
 
-Regras:
-- Seja específico e testável
-- Cada critério deve ser verificável
-- Considere cenários de sucesso e falha
+Formato para cada critério:
+- Número do critério (AC01, AC02, etc.)
+- Título descritivo curto
+- Descrição completa e verificável
+- Considere: sucesso, falha e exceções
 """
 
-# Prompt para gerar casos de teste
+# ----------------------------------------------------------------------------
+# generate_test_cases
+# ----------------------------------------------------------------------------
+
 GENERATE_TEST_CASES_PROMPT = """
 Gere casos de teste completos para a User Story.
 
@@ -84,39 +174,58 @@ User Story:
 Critérios de Aceite:
 {acceptance_criteria}
 
-Formato de resposta (Markdown):
+Tipos de casos de teste a serem gerados:
+
 ## Casos de Teste
 
-### Cenários Positivos
+### Cenários Positivos (Happy Path)
+Casos que verificam o comportamento esperado quando tudo ocorre conforme o planejado.
 
-#### CT001 - [Descrição]
+Formato:
+#### CT001 - [Descrição breve]
 **Precondição**: ...
 **Passos**:
 1. ...
 2. ...
 3. ...
+**Entrada**: ...
 **Resultado Esperado**: ...
 
-### Cenários Negativos
+### Cenários Negativos (Error Path)
+Casos que verificam o comportamento quando entradas inválidas ou erros ocorrem.
 
-#### CT002 - [Descrição]
+Formato:
+#### CT002 - [Descrição breve]
 **Precondição**: ...
 **Passos**:
 1. ...
+**Entrada**: ...
 **Resultado Esperado**: ...
 
-### Exceções
+### Cenários de Exceção
+Casos que verificam comportamentos excepcionais ou edge cases.
 
-#### CT003 - [Descrição]
+Formato:
+#### CT003 - [Descrição breve]
 **Precondição**: ...
 **Passos**:
 1. ...
+**Entrada**: ...
 **Resultado Esperado**: ...
+
+Regras:
+- Comece a numeração em CT001
+- Seja específico nos passos e resultados esperados
+- Considere validações de entrada
+- Inclua casos de performance quando aplicável
 """
 
-# Prompt para identificar riscos
+# ----------------------------------------------------------------------------
+# identify_risks
+# ----------------------------------------------------------------------------
+
 IDENTIFY_RISKS_PROMPT = """
-Identifique riscos técnicos e de negócio para a User Story.
+Identifique riscos técnicos e de negócio associados à User Story.
 
 User Story:
 {user_story}
@@ -127,25 +236,52 @@ Análise:
 Critérios de Aceite:
 {acceptance_criteria}
 
-Formato de resposta (Markdown):
-## Riscos
+Tipos de riscos a considerar:
 
 ### Risco Técnico
-**ID**: RSK-001
+- Complexidade técnica inerente
+- Integrações com outros sistemas
+- Dependencies externas
+- Performance e escalabilidade
+- Segurança
+- Testabilidade do código
+
+### Risco de Negócio
+- Impacto no usuário
+- Cumprimento de regulamentações
+- Reputação da empresa
+- Custo de falha
+
+Formato de resposta (Markdown):
+
+## Riscos Identificados
+
+### Risco Técnico
+**ID**: RSK-TEC-001
 **Descrição**: ...
 **Probabilidade**: [Alta/Média/Baixa]
 **Impacto**: [Alto/Médio/Baixo]
+**Prioridade**: [Alta/Média/Baixa]
 **Mitigação**: ...
 
 ### Risco de Negócio
-**ID**: RSK-002
+**ID**: RSK-NEG-001
 **Descrição**: ...
 **Probabilidade**: [Alta/Média/Baixa]
 **Impacto**: [Alto/Médio/Baixo]
+**Prioridade**: [Alta/Média/Baixa]
 **Mitigação**: ...
+
+Regras:
+- Identifique pelo menos 3 riscos (2 técnicos, 1 de negócio)
+- Use a matriz probabilidade x impacto para priorização
+- Forneça estratégias de mitigação específicas
 """
 
-# Prompt para gerar recomendações
+# ----------------------------------------------------------------------------
+# generate_recommendations
+# ----------------------------------------------------------------------------
+
 GENERATE_RECOMMENDATIONS_PROMPT = """
 Gere recomendações para o time de QA com base na análise da User Story.
 
@@ -155,28 +291,52 @@ User Story:
 Análise:
 {analysis}
 
-Riscos:
+Riscos Identificados:
 {risks}
 
-Formato de resposta (Markdown):
+Áreas para recomendação:
+
 ## Recomendações para QA
 
 ### Preparação do Ambiente
-- ...
+- Infraestrutura necessária
+- Configurações especiais
+- Dados de teste requeridos
 
 ### Dados de Teste
-- ...
+- Quais dados são necessários
+- Como preparar os dados
+- Considerações sobre dados sensíveis
 
 ### Tipos de Teste Recomendados
-- ...
+- Testes funcionais
+- Testes de integração
+- Testes de regressão
+- Testes de performance (se aplicável)
+- Testes de segurança (se aplicável)
 
-### Checklist de Regressão
-- ...
+### Checklist de Validação
+- Verificações antes de deploy
+- Verificações pós-deploy
+- Monitoramento recomendado
+
+### Observações Adicionais
+- Pontos de atenção especiais
+- Interações com outras funcionalidades
+- Documentação necessária
+
+Regras:
+- Seja prático e acionável
+- Priorize o que traz mais valor para a qualidade
+- Considere o orçamento de tempo disponível
 """
 
-# Prompt para construir o relatório final
+# ----------------------------------------------------------------------------
+# build_report
+# ----------------------------------------------------------------------------
+
 BUILD_REPORT_PROMPT = """
-Consolide todas as informações em um relatório estruturado.
+Consolide todas as informações em um relatório estruturado e completo.
 
 User Story Original:
 {user_story}
@@ -190,45 +350,104 @@ Critérios de Aceite:
 Casos de Teste:
 {test_cases}
 
-Riscos:
+Riscos Identificados:
 {risks}
 
 Recomendações:
 {recommendations}
 
-Formato de resposta (Markdown):
+Formato do relatório final (Markdown):
+
 # Relatório de Análise de User Story
 
 ## 1. Resumo
-...
+
+Resumo conciso da funcionalidade analisada, incluindo:
+- O que será desenvolvido
+- Quem utilizará
+- Qual o valor para o negócio
 
 ## 2. Funcionalidades Identificadas
-...
+
+Lista das principais funcionalidades extraídas da User Story:
+- Funcionalidade 1
+- Funcionalidade 2
+- Funcionalidade 3
 
 ## 3. Critérios de Aceite
-...
+
+### AC01 - [Descrição]
+Descrição detalhada...
+
+### AC02 - [Descrição]
+Descrição detalhada...
+
+(continuar para todos os critérios)
 
 ## 4. Casos de Teste
-...
+
+### Cenários Positivos
+
+#### CT001 - [Descrição]
+**Precondição**: ...
+**Passos**: ...
+**Resultado Esperado**: ...
+
+(continuar para todos os casos positivos)
+
+### Cenários Negativos
+
+#### CT00X - [Descrição]
+**Precondição**: ...
+**Passos**: ...
+**Resultado Esperado**: ...
+
+(continuar para todos os casos negativos)
+
+### Exceções
+
+#### CT00X - [Descrição]
+**Precondição**: ...
+**Passos**: ...
+**Resultado Esperado**: ...
+
+(continuar para todos os casos de exceção)
 
 ## 5. Riscos Identificados
-...
+
+### RSK-TEC-001 - [Descrição]
+- **Probabilidade**: ...
+- **Impacto**: ...
+- **Prioridade**: ...
+- **Mitigação**: ...
+
+(continuar para todos os riscos)
 
 ## 6. Recomendações para QA
-...
-"""
 
-# Prompt para validação de entrada
-VALIDATE_INPUT_PROMPT = """
-Valide se a entrada é uma User Story válida.
+### Preparação do Ambiente
+- ...
+
+### Dados de Teste
+- ...
+
+### Tipos de Teste Recomendados
+- ...
+
+### Checklist de Validação
+- ...
+
+## 7. Anexos
+
+### Checklist Utilizado
+[Incluir o checklist QA como referência]
+
+### Notas Adicionais
+[Qualquer informação complementar]
 
 Regras:
-- A User Story deve estar em linguagem natural
-- Deve conter as partes: Como, Quero, Para
-- Tamanho máximo: 5000 caracteres
-
-User Story:
-{user_story}
-
-Responda com "VALID" ou "INVALID" seguido da razão.
+- Mantenha consistência com a formatação Markdown
+- Use numeração sequencial para casos de teste
+- Referencie critérios de aceite nos casos de teste
+- Seja claro e objetivo
 """
