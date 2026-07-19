@@ -20,8 +20,10 @@ Usage:
 """
 
 import os
+import re
 import sys
 from pathlib import Path
+from typing import List
 
 from ai_qa_assistant.config import load_config
 from ai_qa_assistant.graph import create_graph
@@ -82,6 +84,48 @@ def run_analysis(user_story: str) -> QAState:
     return result
 
 
+def load_user_stories_from_file(file_path: str) -> List[str]:
+    """
+    Load one or more user stories from a text file.
+
+    The file may contain multiple user stories separated by one or more
+    blank lines or by the separator line "---".
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+
+    # Split stories by blank lines or explicit separator lines, then
+    # filter out any segments that are empty or contain only dashes
+    raw_parts = re.split(r"(?:\n\s*\n+|\n-{3,}\s*\n)", content)
+    stories = []
+    for part in raw_parts:
+        s = part.strip()
+        if not s:
+            continue
+        # skip parts that are just separator lines like '---' or '-----'
+        if re.fullmatch(r"-+", s):
+            continue
+        stories.append(s)
+
+    if not stories:
+        raise ValueError(f"No user stories found in file: {file_path}")
+
+    return stories
+
+
+def run_analysis_batch(user_stories: List[str]) -> List[QAState]:
+    """
+    Run analysis for multiple user stories sequentially.
+    """
+    results: List[QAState] = []
+    for user_story in user_stories:
+        results.append(run_analysis(user_story))
+    return results
+
+
 def main():
     """
     Main entry point for CLI usage.
@@ -96,31 +140,34 @@ def main():
         print("       ai-qa-assistant --example  # Run with example user story")
         sys.exit(1)
     
-    # Get user story
+    # Get user stories
     if sys.argv[1] == "--file":
         if len(sys.argv) < 3:
             print("Error: --file requires a path argument")
             sys.exit(1)
         
         file_path = sys.argv[2]
-        if not os.path.exists(file_path):
-            print(f"Error: File not found: {file_path}")
+        try:
+            user_stories = load_user_stories_from_file(file_path)
+        except Exception as e:
+            print(f"Error: {e}")
             sys.exit(1)
-        
-        with open(file_path, "r", encoding="utf-8") as f:
-            user_story = f.read()
     elif sys.argv[1] == "--example":
-        user_story = EXAMPLE_USER_STORY
+        user_stories = [EXAMPLE_USER_STORY]
     else:
-        user_story = " ".join(sys.argv[1:])
+        user_stories = [" ".join(sys.argv[1:])]
     
-    # Run analysis
+    # Run analysis for one or more stories
     try:
-        result = run_analysis(user_story)
-        print("\n" + "=" * 60)
-        print("ANÁLISE CONCLUÍDA")
-        print("=" * 60)
-        print("\n" + result["report"])
+        results = run_analysis_batch(user_stories)
+        for idx, result in enumerate(results, start=1):
+            header = f"USER STORY {idx}/{len(results)}"
+            print("\n" + "=" * 60)
+            print(header)
+            print("=" * 60)
+            print(result["report"])
+            if idx < len(results):
+                print("\n" + "#" * 60 + "\n")
     except Exception as e:
         print(f"Error during analysis: {e}")
         sys.exit(1)
