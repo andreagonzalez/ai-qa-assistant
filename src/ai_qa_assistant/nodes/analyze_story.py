@@ -17,6 +17,7 @@ test cases and acceptance criteria.
 
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import ANALYZE_STORY_PROMPT, SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def analyze_story(state: QAState) -> QAState:
@@ -33,14 +34,23 @@ def analyze_story(state: QAState) -> QAState:
         Updated state with analysis result in the analysis field
         
     Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.ANALYZE_STORY_PROMPT
-        - Should update state.analysis field with structured analysis
+        - This node uses the LLM to interpret the user story
+        - Extracts key information for downstream processing
     """
-    # TODO: Call LLM with ANALYZE_STORY_PROMPT and SYSTEM_PROMPT
-    # TODO: Parse LLM response to extract analysis information
-    # TODO: Update state.analysis with the structured analysis
-    # TODO: Return updated state
+    # Format prompt with state data
+    prompt_data = {
+        "user_story": state["user_story"],
+        "checklist": state.get("checklist", ""),
+    }
     
-    # Placeholder: return state as-is
-    pass
+    # Call LLM
+    response = call_llm_with_template(
+        ANALYZE_STORY_PROMPT,
+        **prompt_data,
+        system_prompt=SYSTEM_PROMPT,
+    )
+    
+    # Update state with analysis result
+    state["analysis"] = response
+    
+    return state

@@ -8,6 +8,7 @@ testable, and cover success and failure scenarios.
 
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import GENERATE_ACCEPTANCE_PROMPT, SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def generate_acceptance(state: QAState) -> QAState:
@@ -24,16 +25,22 @@ def generate_acceptance(state: QAState) -> QAState:
     Returns:
         Updated state with acceptance criteria in the acceptance_criteria field.
         Format: Markdown with numbered criteria (AC01, AC02, etc.)
-        
-    Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.GENERATE_ACCEPTANCE_PROMPT
-        - Should update state.acceptance_criteria field
     """
-    # TODO: Call LLM with GENERATE_ACCEPTANCE_PROMPT and SYSTEM_PROMPT
-    # TODO: Parse LLM response to extract acceptance criteria
-    # TODO: Update state.acceptance_criteria with the generated criteria
-    # TODO: Return updated state
+    # Format prompt with state data
+    prompt_data = {
+        "user_story": state["user_story"],
+        "analysis": state.get("analysis", ""),
+        "checklist": state.get("checklist", ""),
+    }
     
-    # Placeholder: return state as-is
-    pass
+    # Call LLM
+    response = call_llm_with_template(
+        GENERATE_ACCEPTANCE_PROMPT,
+        **prompt_data,
+        system_prompt=SYSTEM_PROMPT,
+    )
+    
+    # Update state with acceptance criteria
+    state["acceptance_criteria"] = response
+    
+    return state

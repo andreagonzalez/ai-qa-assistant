@@ -12,6 +12,7 @@ The test cases should be detailed enough to be directly implemented.
 
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import GENERATE_TEST_CASES_PROMPT, SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def generate_test_cases(state: QAState) -> QAState:
@@ -42,16 +43,21 @@ def generate_test_cases(state: QAState) -> QAState:
         ### Exceções
         #### CT003 - [Description]
         ...
-        
-    Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.GENERATE_TEST_CASES_PROMPT
-        - Should update state.test_cases field with structured test cases
     """
-    # TODO: Call LLM with GENERATE_TEST_CASES_PROMPT and SYSTEM_PROMPT
-    # TODO: Parse LLM response to extract test cases
-    # TODO: Update state.test_cases with the generated test cases
-    # TODO: Return updated state
+    # Format prompt with state data
+    prompt_data = {
+        "user_story": state["user_story"],
+        "acceptance_criteria": state.get("acceptance_criteria", ""),
+    }
     
-    # Placeholder: return state as-is
-    pass
+    # Call LLM
+    response = call_llm_with_template(
+        GENERATE_TEST_CASES_PROMPT,
+        **prompt_data,
+        system_prompt=SYSTEM_PROMPT,
+    )
+    
+    # Update state with test cases
+    state["test_cases"] = response
+    
+    return state

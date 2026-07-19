@@ -9,6 +9,7 @@ test cases, risks, and recommendations.
 
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import BUILD_REPORT_PROMPT, SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def build_report(state: QAState) -> QAState:
@@ -30,16 +31,25 @@ def build_report(state: QAState) -> QAState:
     Returns:
         Updated state with final report in the report field.
         The report includes all sections in Markdown format.
-        
-    Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.BUILD_REPORT_PROMPT
-        - Should update state.report field with the final Markdown report
     """
-    # TODO: Call LLM with BUILD_REPORT_PROMPT and SYSTEM_PROMPT
-    # TODO: Parse LLM response to extract the full report
-    # TODO: Update state.report with the generated Markdown report
-    # TODO: Return updated state
+    # Format prompt with state data
+    prompt_data = {
+        "user_story": state["user_story"],
+        "analysis": state.get("analysis", ""),
+        "acceptance_criteria": state.get("acceptance_criteria", ""),
+        "test_cases": state.get("test_cases", ""),
+        "risks": state.get("risks", ""),
+        "recommendations": state.get("recommendations", ""),
+    }
     
-    # Placeholder: return state as-is
-    pass
+    # Call LLM
+    response = call_llm_with_template(
+        BUILD_REPORT_PROMPT,
+        **prompt_data,
+        system_prompt=SYSTEM_PROMPT,
+    )
+    
+    # Update state with final report
+    state["report"] = response
+    
+    return state

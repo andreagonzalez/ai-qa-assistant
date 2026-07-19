@@ -10,6 +10,7 @@ with the user story. For each risk, it assesses:
 
 from ai_qa_assistant.state import QAState
 from ai_qa_assistant.prompts import IDENTIFY_RISKS_PROMPT, SYSTEM_PROMPT
+from ai_qa_assistant.llm import call_llm_with_template
 
 
 def identify_risks(state: QAState) -> QAState:
@@ -40,16 +41,22 @@ def identify_risks(state: QAState) -> QAState:
         **ID**: RSK-NEG-001
         **Descrição**: ...
         ...
-        
-    Notes:
-        - This is a placeholder implementation
-        - LLM call should be implemented using prompts.IDENTIFY_RISKS_PROMPT
-        - Should update state.risks field with structured risk information
     """
-    # TODO: Call LLM with IDENTIFY_RISKS_PROMPT and SYSTEM_PROMPT
-    # TODO: Parse LLM response to extract risk information
-    # TODO: Update state.risks with the identified risks
-    # TODO: Return updated state
+    # Format prompt with state data
+    prompt_data = {
+        "user_story": state["user_story"],
+        "analysis": state.get("analysis", ""),
+        "acceptance_criteria": state.get("acceptance_criteria", ""),
+    }
     
-    # Placeholder: return state as-is
-    pass
+    # Call LLM
+    response = call_llm_with_template(
+        IDENTIFY_RISKS_PROMPT,
+        **prompt_data,
+        system_prompt=SYSTEM_PROMPT,
+    )
+    
+    # Update state with risks
+    state["risks"] = response
+    
+    return state
