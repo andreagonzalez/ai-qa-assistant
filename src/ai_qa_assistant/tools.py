@@ -3,50 +3,32 @@ Tools available to the AI QA Assistant agent.
 """
 
 import os
-from typing import Optional
+from pathlib import Path
 
 
 def load_checklist(checklist_path: str = "src/docs/checklist_qa.md") -> str:
     """
-    Load QA checklist from file.
+    Load QA checklist from a Markdown file.
     
     Args:
-        checklist_path: Path to the checklist file
+        checklist_path: Path to the checklist file (default: src/docs/checklist_qa.md)
         
     Returns:
         Checklist content as string
         
     Raises:
         FileNotFoundError: If checklist file doesn't exist
+        IOError: If file cannot be read
     """
-    # TODO: Implement file reading logic
-    pass
-
-
-def save_report(report: str, output_path: str = "src/reports/report.md") -> bool:
-    """
-    Save the final report to a Markdown file.
+    # Resolve relative paths from the project root
+    project_root = Path(__file__).parent.parent
+    full_path = project_root / checklist_path
     
-    Args:
-        report: Report content to save
-        output_path: Output file path
-        
-    Returns:
-        True if saved successfully, False otherwise
-    """
-    # TODO: Implement file writing logic
-    pass
-
-
-def validate_input(user_story: str) -> bool:
-    """
-    Validate user story input.
+    if not full_path.exists():
+        raise FileNotFoundError(f"Checklist file not found: {full_path}")
     
-    Args:
-        user_story: User story text to validate
-        
-    Returns:
-        True if valid, False otherwise
-    """
-    # TODO: Implement validation logic
-    pass
+    try:
+        with open(full_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except IOError as e:
+        raise IOError(f"Failed to read checklist file: {e}")

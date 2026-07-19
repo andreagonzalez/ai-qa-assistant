@@ -1,30 +1,36 @@
 """
 State definition for the AI QA Assistant agent.
+
+This module defines the shared state structure used by the LangGraph nodes.
+TypedDict is used for better type hints and runtime validation.
 """
 
-from pydantic import BaseModel, Field
+from typing import TypedDict
 
 
-class QAState(BaseModel):
+class QAState(TypedDict):
     """
     State shared across all nodes in the LangGraph.
     
-    Fields:
-        user_story: Raw user story input
-        checklist: QA checklist loaded from file
+    This TypedDict defines the contract for data passed between nodes
+    in the graph. Each node reads and updates specific fields of the state.
+    
+    Attributes:
+        user_story: Raw user story input text
+        checklist: QA checklist content loaded from file
         analysis: Analysis of the user story
         acceptance_criteria: Generated acceptance criteria
         test_cases: Generated test cases (positive, negative, exceptions)
-        risks: Identified risks
-        recommendations: QA recommendations
-        report: Final Markdown report
+        risks: Identified technical and business risks
+        recommendations: QA recommendations based on analysis
+        report: Final consolidated Markdown report
     """
     
-    user_story: str = Field(default="", description="Raw user story input")
-    checklist: str = Field(default="", description="QA checklist loaded from file")
-    analysis: str = Field(default="", description="Analysis of the user story")
-    acceptance_criteria: str = Field(default="", description="Generated acceptance criteria")
-    test_cases: str = Field(default="", description="Generated test cases")
-    risks: str = Field(default="", description="Identified risks")
-    recommendations: str = Field(default="", description="QA recommendations")
-    report: str = Field(default="", description="Final Markdown report")
+    user_story: str
+    checklist: str
+    analysis: str
+    acceptance_criteria: str
+    test_cases: str
+    risks: str
+    recommendations: str
+    report: str
